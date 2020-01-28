@@ -5,7 +5,7 @@
         <pre>  
           
           Welcome to User Home
-          <p v-if="res"> {{ res }} </p></pre>
+        </pre>
       </v-row>
     </v-container>
   </AppLayout>
@@ -18,13 +18,17 @@
     },
     data() {
       return {
-        res: ''
       }
     },
     created() {
       var self = this
-      this.$http.secured.get('/welcome/index')
-        .then(response => { self.res = response.data })
+      var id = this.$store.state.currentUser.id;
+      this.$http.secured.get(`users/image/${id}`)
+        .then(response => { 
+          if(response.data.path){
+            self.$store.commit('getprofileImage', response.data.path)
+          }
+         })
         .catch(e => {
           self.res = e
         })

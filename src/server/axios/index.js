@@ -27,7 +27,6 @@ const imageAxiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: false,
   headers: {
-    'Content-Type': 'image/*',
   }
 })
 
@@ -42,6 +41,7 @@ securedAxiosInstance.interceptors.request.use(config => {
 imageAxiosInstance.interceptors.request.use(config => {
   config.headers = {
     ...config.headers,
+    // 'Content-Type' : 'image/jpeg',
     'Authorization': store.state.token
   }
   return config

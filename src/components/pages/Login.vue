@@ -43,7 +43,7 @@
          </v-card-text>
          <v-card-actions>
           <v-row justify="center">
-            <v-btn normal text color="success" @click="login">               GET STARTED
+            <v-btn normal text color="success" @keyup.enter="login" @click="login">               GET STARTED
             </v-btn> 
           </v-row>
          </v-card-actions>
@@ -70,26 +70,26 @@ export default {
     },
     methods: {
       login () {
-        var self = this
-        this.$http.plain.post('/login', { user: self.inputData })
-        .then(response => { self.res = response
-          if(self.res.headers.authorization){
-            self.token = self.res.headers.authorization
-            localStorage.access = self.token
-            self.$store.commit('setCurrentUser', { currentUser: response.data, token: response.headers.authorization } )
-            if(self.$store.state.admin){
-              self.$router.replace('/admin/home')
+        if (this.inputData.email && this.inputData.password){
+          var self = this
+          this.$http.plain.post('/login', { user: self.inputData })
+          .then(response => { self.res = response
+            if(self.res.headers.authorization){
+              self.token = self.res.headers.authorization
+              localStorage.access = self.token
+              self.$store.commit('setCurrentUser', { currentUser: response.data, token: response.headers.authorization } )
+              if(self.$store.state.admin){
+                self.$router.replace('/admin/home')
+              }
+              else{
+                self.$router.replace('/home')
+              }
             }
-            else{
-              self.$router.replace('/home')
-            }
-            
-          }
-          
+            })
+          .catch(e => {
+            self.res = e
           })
-        .catch(e => {
-          self.res = e
-        })
+        }
       }
     },
     created () {

@@ -11,31 +11,31 @@
                 <v-avatar class="profile my-n12" color="grey" size="200">
                   <div class="text-center">
                     <v-dialog v-model="dialog" width="600">
+                      <form @submit.prevent="previewImage">
                       <v-card>
                         <v-card-title class="grey lighten-2" >
                           Select an image to upload (maximum size 2MB)
                         </v-card-title>
                         <v-divider></v-divider>
                         <v-card-text>
-                          <!-- <v-file-input label="Select Image.." outlined show-size shaped prepend-icon="mdi-camera" @change="previewImage"></v-file-input> -->
-         
-                          <input type="file" @change="previewImage" accept="image/*">
-          
+                          
+                            <input type="file" @change="getImage" accept="image/*">
+                            
+                         
                         </v-card-text>
                         <v-divider></v-divider>
                         <v-card-actions>
                           <v-spacer>
                           </v-spacer>
                             <v-btn color="primary" text @click="dialog = false">Cancel</v-btn>
-                            <v-btn color="primary" text @click="onImageUpload">Upload</v-btn> 
+                            <!-- <input type="submit" value="Upload"> -->
+                            <v-btn color="primary" text type="submit">Upload</v-btn> 
                         </v-card-actions>
                       </v-card>
+                    </form>
                     </v-dialog>
-                    <div class="image-preview" v-if="imageData.length > 0">
-                      <img class="preview" :src="imageData">
                   </div>
-                  </div>
-                  <v-img v-if="profileImage" :src="profileImage"></v-img>
+                  <v-img contain v-if="profileImage" :src="profileImage"></v-img>
                   <!-- <v-file-input show-size  rounded :rules="rules" accept="image/png, image/jpeg, image/jpg, imagr/bmp" prepend-icon="mdi-camera"></v-file-input> -->
                   <v-btn v-else text icon color="white" ripple @click="dialog = true"><v-icon large >mdi-camera</v-icon></v-btn>
                 </v-avatar>         
@@ -72,47 +72,45 @@
           value => !value || value.size < 2000000 || 'Image size should be less than 2MB!'
         ],
         dialog: false,
-        file: [],
+        user: {
+          avatar: null
+        },
+        file: null,
         imageData: '',
-        res: ''
+        res: '',
+        formData: null
         
       }
     },
     created (){
       this.username = this.$store.state.currentUser.name;
+      this.profileImage = this.$store.state.profileImage;
     },
     methods: {
       onImageUpload () {
-        console.log(this.file)
-        console.log(this.file.type)
         this.$store.commit('getFile', this.file[0])
         this.dialog = false
       },
-      previewImage: function(event) {
-            // Reference to the DOM input element
-            var input = event.target;
-            // Ensure that you have a file before attempting to read it
-            if (input.files && input.files[0]) {
-                // create a new FileReader to read this image and convert to base64 format
-                var reader = new FileReader();
-                // Define a callback function to run, when FileReader finishes its job
-                reader.onload = (e) => {
-                    // Note: arrow function used here, so that "this.imageData" refers to the imageData of Vue component
-                    // Read image as base64 and set to imageData
-                    this.imageData = e.target.result;
-                    var imageBase = this.imageData.split(',')[1];
-                    console.log(imageBase)
-                    var id = this.$store.state.currentUser.id;
-                    console.log(id)
-                    this.$http.secured.patch(`users/${id}`,{ user: { avatar: imageBase} })
-                    .then(response => { self.res = response.data })
-                    .catch(e => {
-                      self.res = e
-                    })
-                }
-                // Start the reader job - read file as a data url (base64 format)
-                reader.readAsDataURL(input.files[0]);
+        previewImage (){
+          let id = this.$store.state.currentUser.id;
+          const formData = new FormData()
+          formData.append('avatar', this.file);
+          var self=this
+          this.$http.image.post(`users/image/${id}`,formData)
+            .then(response => {
+            if(response.data.path){
+              self.$store.commit('getprofileImage', response.data.path)
+              self.profileImage = response.data.path
+              self.dialog = false
             }
+            })
+            .catch(e => {
+              self.res = e
+              self.dialog = false
+              })
+        },
+        getImage (event){
+          this.file = event.target.files[0]
         }
     }
   }
