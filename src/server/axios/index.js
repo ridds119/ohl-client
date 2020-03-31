@@ -46,30 +46,6 @@ imageAxiosInstance.interceptors.request.use(config => {
   }
   return config
 })
-//There are no refresh tokens in case of jwt-devise
-
-// securedAxiosInstance.interceptors.response.use(null, error => {
-//   if (error.response && error.response.config && error.response.status === 401) {
-//     // In case 401 is caused by expired access cookie - we'll do refresh request
-//     return plainAxiosInstance.post('/refresh', {}, { headers: { 'Authorization': localStorage.access } })
-//       .then(response => {
-//         localStorage.access = response.headers.authorization
-//         localStorage.signedIn = true
-//         // And after successful refresh - repeat the original request
-//         let retryConfig = error.response.config
-//         retryConfig.headers['Authorization'] = localStorage.access
-//         return plainAxiosInstance.request(retryConfig)
-//       }).catch(error => {
-//         delete localStorage.access
-//         delete localStorage.signedIn
-//         // redirect to signin in case refresh request fails
-//         location.replace('/')
-//         return Promise.reject(error)
-//       })
-//   } else {
-//     return Promise.reject(error)
-//   }
-// })
 
 
 export { securedAxiosInstance, plainAxiosInstance, imageAxiosInstance }
